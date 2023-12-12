@@ -1,0 +1,49 @@
+# Este archivo YAML define un Deployment en Kubernetes
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment # Nombre del Deployment, en este caso, "nginx-deployment"
+
+spec:
+  replicas: 2 # Número de réplicas deseadas del conjunto de Pods
+  selector:
+    matchLabels:
+      app: nginx # Etiqueta de selector que coincide con las etiquetas de los Pods gestionados por el Deployment
+
+  template:
+    metadata:
+      labels:
+        app: nginx # Etiqueta que se asignará a los Pods gestionados por el Deployment
+    spec:
+      containers:
+        - name: nginx # Nombre del contenedor dentro de los Pods gestionados por el Deployment
+          image: nginx:alpine # Imagen del contenedor a utilizar, en este caso, la versión "alpine" de Nginx
+          env:
+            - name: MI_VARIABLE # Definición de una variable de entorno llamada "MI_VARIABLE"
+              value: 'pelado' # Valor asignado a la variable "MI_VARIABLE"
+            - name: MI_OTRA_VARIABLE # Definición de otra variable de entorno llamada "MI_OTRA_VARIABLE"
+              value: 'pelade' # Valor asignado a la variable "MI_OTRA_VARIABLE"
+            - name: DD_AGENT_HOST # Definición de una variable de entorno llamada "DD_AGENT_HOST"
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP # Utiliza el campo "hostIP" del estado del Pod como valor para "DD_AGENT_HOST"
+          resources: # Definición de recursos asignados al contenedor
+            requests:
+              memory: '64Mi' # Límite inferior de memoria solicitada
+              cpu: '200m' # Límite inferior de CPU solicitada
+            limits:
+              memory: '128Mi' # Límite superior de memoria permitida
+              cpu: '500m' # Límite superior de CPU permitida
+          readinessProbe: # Configuración de la sonda de preparación (readiness probe)
+            httpGet:
+              path: '/' # Ruta del endpoint a consultar
+              port: 80 # Puerto a utilizar
+            initialDelaySeconds: 5 # Retardo inicial antes de comenzar las sondas de preparación
+            periodSeconds: 10 # Frecuencia entre sondas de preparación
+          livenessProbe: # Configuración de la sonda de vida (liveness probe)
+            tcpSocket:
+              port: 80 # Puerto a utilizar
+            initialDelaySeconds: 15 # Retardo inicial antes de comenzar las sondas de vida
+            periodSeconds: 20 # Frecuencia entre sondas de vida
+          ports: # Definición de los puertos expuestos por el contenedor
+            - containerPort: 80 # Puerto del contenedor que se expone
