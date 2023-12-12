@@ -1,0 +1,54 @@
+# Este archivo YAML define un StatefulSet en Kubernetes para una aplicación con
+# almacenamiento persistente
+
+# Un StatefulSet es un controlador en Kubernetes que se utiliza para gestionar
+# aplicaciones que requieren identidad única y persistencia en el tiempo, como
+# bases de datos. A diferencia de los Deployments o ReplicaSets, un StatefulSet
+# asigna un nombre único y estable a cada Pod que crea, lo que permite mantener
+# una identidad persistente a lo largo de reinicios y reprogramaciones.
+
+# En resumen, el kind de StatefulSet indica que el archivo YAML está definiendo
+# un StatefulSet, un recurso de Kubernetes diseñado para gestionar aplicaciones
+# que requieren un manejo especial de identidad y persistencia.
+
+# ⚠️Esto presenta problemas si se ejecuta desde minikube por lo volumenes
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: my-csi-app-set # Nombre del StatefulSet, en este caso, "my-csi-app-set"
+
+spec:
+  selector:
+    matchLabels:
+      app: mypod # Etiqueta de selector que coincide con las etiquetas de los Pods gestionados por el StatefulSet
+
+  serviceName: 'my-frontend' # Nombre del servicio que se creará para el StatefulSet
+
+  replicas: 1 # Número de réplicas deseadas del StatefulSet
+
+  template:
+    metadata:
+      labels:
+        app: mypod # Etiqueta que se asignará a los Pods gestionados por el StatefulSet
+    spec:
+      containers:
+        - name: my-frontend # Nombre del contenedor dentro de los Pods gestionados por el StatefulSet
+          image: busybox # Imagen del contenedor a utilizar, en este caso, "busybox"
+          args:
+            - sleep
+            - infinity
+          volumeMounts:
+            - mountPath: '/data' # Ruta de montaje del volumen en el contenedor
+              name: csi-pvc # Nombre del volumen a montar en el contenedor
+
+  volumeClaimTemplates:
+    - metadata:
+        name: csi-pvc # Nombre del volumen persistente que se solicitará
+      spec:
+        accessModes:
+          - ReadWriteOnce # Modo de acceso al volumen
+        resources:
+          requests:
+            storage: 5Gi # Capacidad de almacenamiento solicitada para el volumen
+        storageClassName: do-block-storage # Clase de almacenamiento para la persistencia del volumen
