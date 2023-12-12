@@ -1,0 +1,9 @@
+# Versión de la API de este recurso de kubernetes
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx # Nombre del Pod, en este caso, "nginx"
+spec:
+  containers:
+    - name: nginx # Nombre del contenedor dentro del Pod, también "nginx"
+      image: nginx:alpine # Imagen del contenedor a utilizar, en este caso, la versión "alpine" de Nginx
